@@ -1,15 +1,12 @@
 # Randori: Like Aiki. With a couple of Dans under its belt.
 
-## Fully based on PAM. Because PAM is actually an acronym for "*P*wn *A*ll *M*achines"
+## Fully based on PAM (*P*wn *A*ll *M*alware)
 
-Randori (乱取り) is a term used in Japanese martial arts to describe free-style
-practice. In the Aikikai style of aikido, it refers to a form of practice in which
-a designated aikidoka defends against multiple attackers in quick succession without
-knowing how they will attack or in what order. [https://en.wikipedia.org/wiki/Randori]
+> Randori (乱取り) In the Aikikai style of aikido, a form of practice in which
+> a designated aikidoka defends against multiple attackers in quick succession.
+> [https://en.wikipedia.org/wiki/Randori]
 
-Basically it is http://github.com/avuko/aiki on steroids.
-
-
+Basically it is my http://github.com/avuko/aiki PoC on steroids.
 
 First of all, shoutout to `0xBF` (ONSec-Lab) for giving us
 https://github.com/ONsec-Lab/scripts/tree/master/pam_steal.
@@ -20,40 +17,42 @@ and comments about cowrie (https://github.com/micheloosterhof/cowrie).
 
 ## PAM module
 
-This PAM module will log to /var/log/aiki.log all services, remote hosts, usernames and
-passwords. In a future release, all of this will be logged to a message queue for further
-processing. For now, it is just a regular low-interaction honeypot gathering credentials.
+This PAM module will log to `/var/log/randori.log` all services, remote hosts, usernames and
+passwords (make sure `/var/log/randori.log` is readable). I am working on a setup where
+all of this will be logged to a message queue (of sorts) for further processing.
+For now, it is just a regular low-interaction honeypot gathering credentials.
 
 ```c
 /*
- * pam_aiki - get remote service/clientip/username/password from
+ * pam_randori - get remote service/clientip/username/password from
  * brute-force attacks
  *
- * Usage: add "auth required pam_aiki.so" into /etc/pam.d/common-auth
+ * Usage: add "auth required pam_randori.so"
+ * into /etc/pam.d/common-auth
  * just above "auth requisite pam_deny.so"
- * 
- * 
+ *
+ *
  * Reload services using PAM to start getting output.
- * Perhaps needless to add, but you might want to 
+ * Perhaps needless to add, but you might want to
  * only log in with keys :)
  */
 
 #include <stdio.h>
 #include <string.h>
 #include <security/pam_modules.h>
-#define LOGFILE "/var/log/aiki.log"
+#define LOGFILE "/var/log/randori.log"
 
 PAM_EXTERN int pam_sm_authenticate(pam_handle_t * pamh, int flags
                                    ,int argc, const char **argv)
 {
     int retval;
-    
+
     const void *servicename;
     const char *username;
     const void *password;
     const void *rhostname;
     FILE *log;
-    
+
     /* get the name of the calling PAM_SERVICE. */
     retval=pam_get_item(pamh, PAM_SERVICE, &servicename);
 
@@ -96,51 +95,64 @@ Run `./make.sh`
 
 set -e
 
-rm -f pam_aiki.so
-gcc -g -O2 -MT pam_aiki_la-pam_aiki.lo -MD -MP -MF\
-pam_aiki_la-pam_aiki.Tpo -c pam_aiki.c  -fPIC -DPIC -o\
-pam_aiki_la-pam_aiki.o
-gcc -shared pam_aiki_la-pam_aiki.o -lpam_misc -lpam -Wl,\
--soname -Wl,pam_aiki.so -o pam_aiki.so
-rm -f pam_aiki_la-pam_aiki.Tpo pam_aiki_la-pam_aiki.o
+rm -f pam_randori.so
+gcc -g -O2 -MT pam_randori_la-pam_randori.lo -MD -MP -MF\
+pam_randori_la-pam_randori.Tpo -c pam_randori.c  -fPIC -DPIC -o\
+pam_randori_la-pam_randori.o
+gcc -shared pam_randori_la-pam_randori.o -lpam_misc -lpam -Wl,\
+-soname -Wl,pam_randori.so -o pam_randori.so
+rm -f pam_randori_la-pam_randori.Tpo pam_randori_la-pam_randori.o
 
-cp pam_aiki.so /lib/x86_64-linux-gnu/security/
+cp pam_randori.so /lib/x86_64-linux-gnu/security/
 ```
 
-Add `pam_aiki.so` to `/etc/pam.d/common-auth` just above the
-`pam_deny` module:
+Add `pam_randori.so` to `/etc/pam.d/common-auth`.
+
+> TIL: Never try to test things like this manually when it is 2 AM. Unless you want a
+> `deny == success` pam configuration (ooops).
+
+Anyway, the below will not log valid credentials, but will log any other non-valid
+attempts. Also, I wrote `testlogins.sh` to verify this, because... yeah "ooops".
+
 
 ```diff
-diff common-auth /etc/pam.d/common-auth
-19,20d18
-< # XXX adding pam_aiki
-< auth 	required 			pam_aiki.so
-26d23
-<
+diff /etc/pam.d/common-auth common-auth
+17c17,18
+< auth	[success=1 default=ignore]	pam_unix.so nullok_secure
+---
+> #auth	[success=1 default=ignore]	pam_unix.so nullok_secure
+> auth	[default=ignore]	pam_unix.so nullok_secure
+18a20,21
+> # XXX adding pam_randori
+> auth 	[ignore=1 default=ignore] 	pam_randori.so
+23a27
+>
 ```
 
-`/etc/pam.d/common-auth` should now look something like this:
+Your `/etc/pam.d/common-auth` should now look something like this:
 
 ```bash
-# here's the fallback if no module succeeds
-# XXX adding pam_aiki
-auth 	required 			pam_aiki.so
+grep -v '#' /etc/pam.d/common-auth
+auth	[success=2 default=ignore]	pam_unix.so nullok_secure
+auth	required			pam_randori.so
 auth	requisite			pam_deny.so
-[...]
+auth	required			pam_permit.so
+
 ```
 
-## OpenSSH rebuild
+## OpenSSH
 
-Yes, this is necessary.  OpenSSH, instead of keeping the original password,
+You need to build OpenSSH from source.
+Yes, this is necessary. OpenSSH, instead of keeping the original password,
 throws out a (rather haphazardly chosen?) string:
 
 ```bash
-grep -nR INCORRECT auth-pam.c
+grep -n INCORRECT auth-pam.c
 822:	/* t char junk[] = "\b\n\r\177INCORRECT"; */
 ```
 
-In order not to mess with the original code to much (and because I'm already way
-out of my comfort zone writing/editing all this C), I made a simple change only:
+In order not to mess with the original code too much (and because I'm already way
+out of my comfort zone writing/editing C), I made a simple change only:
 
 ```c
 	/* XXX avuko: 2017-19-06T17:00:00 Tweak to return the password
@@ -164,6 +176,7 @@ out of my comfort zone writing/editing all this C), I made a simple change only:
 
 Yes, that is very, very likely a fully unnecessary loop. But then there is
 `CVE-2016-6210-2`, so lets leave well enough alone.
+
 
 ## Apache
 
