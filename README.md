@@ -2,7 +2,9 @@
 
 ## Fully based on PAM (*P*wn *A*ll *M*alware)
 
-> Randori (乱取り) In the Aikikai style of aikido, a form of practice in which
+![randori](randori.jpg)
+
+> Randori (乱取り) In the Aikikai style of aikido, is a form of practice in which
 > a designated aikidoka defends against multiple attackers in quick succession.
 > [https://en.wikipedia.org/wiki/Randori]
 
