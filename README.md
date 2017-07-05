@@ -1,16 +1,20 @@
-# Randori: Like Aiki. With a couple of Dans under its belt.
+# Randori: fend off multiple attackers
 
 ## Fully based on PAM (*P*wn *A*ll *M*alware)
 
-![randori](randori.jpg)
+<!-- ![randori](randori.gif) -->
 
-> Randori (乱取り) In the Aikikai style of aikido, is a form of practice in which
-> a designated aikidoka defends against multiple attackers in quick succession.
+<img src="randori.gif" align="left" />
+
+> Randori (乱取り) is a form of practice<br />
+> in which a designated aikidoka<br />
+> defends against multiple attackers<br />
+> in quick succession.<br />
 > [https://en.wikipedia.org/wiki/Randori]
 
 Basically it is my http://github.com/avuko/aiki PoC on steroids.
 
-First of all, shoutout to `0xBF` (ONSec-Lab) for giving us
+Shoutout to `0xBF` (ONSec-Lab) for giving us
 https://github.com/ONsec-Lab/scripts/tree/master/pam_steal.
 All of the below is based on that simple, great idea.
 
@@ -20,9 +24,16 @@ and comments about cowrie (https://github.com/micheloosterhof/cowrie).
 ## PAM module
 
 This PAM module will log to `/var/log/randori.log` all services, remote hosts, usernames and
-passwords (make sure `/var/log/randori.log` is read/writable). I am working on a setup where
-all of this will be logged to a message queue (of sorts) for further processing.
-For now, it is just a regular low-interaction honeypot gathering credentials.
+passwords (make sure `/var/log/randori.log` is read/writable).
+
+Satisfy prerequisites:
+
+```bash
+sudo apt-get install build-essential dpatch fakeroot\
+devscripts equivs lintian quilt libpam0g-dev
+ ```
+
+[pam_randori.c](./pam_randori.c)
 
 ```c
 /*
@@ -88,9 +99,8 @@ PAM_EXTERN int pam_sm_setcred(pam_handle_t *pamh, int flags,
 }
 ```
 
-Run `./make.sh`
+Run [make.sh](./make.sh)
 
-*make.sh*
 
 ```bash
 #!/bin/sh
@@ -114,39 +124,24 @@ Add `pam_randori.so` to `/etc/pam.d/common-auth`.
 > `deny == success` pam configuration (ooops).
 
 Anyway, the below will not log valid credentials, but will log any other non-valid
-attempts. Also, I wrote `testlogins.sh` to verify this, because... yeah "ooops".
+attempts. Also, I wrote `testlogins.sh` to verify this, because...
 
 
-```diff
-diff /etc/pam.d/common-auth common-auth
-17c17,18
-< auth	[success=1 default=ignore]	pam_unix.so nullok_secure
----
-> #auth	[success=1 default=ignore]	pam_unix.so nullok_secure
-> auth	[default=ignore]	pam_unix.so nullok_secure
-18a20,21
-> # XXX adding pam_randori
-> auth 	[ignore=1 default=ignore] 	pam_randori.so
-23a27
->
-```
-
-Your `/etc/pam.d/common-auth` should now look something like this:
+Your [/etc/pam.d/common-auth](common-auth) should now look something like this:
 
 ```bash
-grep -v '#' /etc/pam.d/common-auth
 auth	[success=2 default=ignore]	pam_unix.so nullok_secure
 auth	required			pam_randori.so
 auth	requisite			pam_deny.so
 auth	required			pam_permit.so
-
 ```
 
 ## OpenSSH
 
 You need to build OpenSSH from source.
 Yes, this is necessary. OpenSSH, instead of keeping the original password,
-throws out a (rather haphazardly chosen?) string:
+throws out a (rather haphazardly chosen?) string when incorrect credentials
+are entered:
 
 ```bash
 grep -n INCORRECT auth-pam.c
@@ -157,8 +152,8 @@ In order not to mess with the original code too much (and because I'm already wa
 out of my comfort zone writing/editing C), I made a simple change only:
 
 ```c
-	/* XXX avuko: 2017-19-06T17:00:00 Tweak to return the password
-     * entered for a non existing account */
+	/* XXX avuko: 2017-19-06T17:00:00 Tweak to return
+     * the incorrect password entered */
 
 	/* t char junk[] = "\b\n\r\177INCORRECT"; */
 	char *ret = NULL;
@@ -180,7 +175,7 @@ Yes, that is very, very likely a fully unnecessary loop. But then there is
 `CVE-2016-6210-2`, so lets leave well enough alone.
 
 
-## Apache
+## Randori for Apache
 
 get apache2 and the apache pam module
 
@@ -210,6 +205,6 @@ Edit/create `/etc/pam.d/apache`
 ```
 
 And that was all there was to it. Next, we need a lot of finishing touches with
-`<VirtualHost>` magic.
+`<VirtualHost>` magic or setting up multiple different `pam` modules for `Location`.
 
 

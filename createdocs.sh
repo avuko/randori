@@ -5,7 +5,7 @@ mergedfile='README.md'
 mdmerge ${markdownfile} > ${mergedfile}
 pdfname='README.pdf'
 latexengine='lualatex'
-highlightstyle='--highlight-style=zenburn'
+highlightstyle='--highlight-style=tango'
 # pygments (the default)
 # kate
 # monochrome
@@ -19,5 +19,5 @@ includeinheader='--include-in-header=fontoptions.tex'
 # verbose='--verbose'
 
 echo "building ${pdfname} and ${mergedfile}"
-pandoc -f markdown+pandoc_title_block ${verbose} ${highlightstyle} -N --template=template.latex  ${documentclass} --variable papersize:a4 --variable colorlinks  --variable geometry:margin=1in ${includeinheader}  --variable fontsize="12pt" --variable monofont="SourceCodePro-Regular" --variable fontsize="12pt"  ${mergedfile} --latex-engine=${latexengine} --toc -o ${pdfname}
+pandoc -f markdown+pandoc_title_block ${verbose} ${highlightstyle} -N --template=template.latex  ${documentclass} --variable papersize:a4 --variable colorlinks  --variable geometry:margin=1in ${includeinheader}  --variable fontsize="12pt" --variable monofont="SourceCodePro-Regular" --variable fontsize="11pt"  ${mergedfile} --latex-engine=${latexengine} --toc -o ${pdfname}
 
