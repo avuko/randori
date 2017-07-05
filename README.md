@@ -20,7 +20,7 @@ and comments about cowrie (https://github.com/micheloosterhof/cowrie).
 ## PAM module
 
 This PAM module will log to `/var/log/randori.log` all services, remote hosts, usernames and
-passwords (make sure `/var/log/randori.log` is readable). I am working on a setup where
+passwords (make sure `/var/log/randori.log` is read/writable). I am working on a setup where
 all of this will be logged to a message queue (of sorts) for further processing.
 For now, it is just a regular low-interaction honeypot gathering credentials.
 
