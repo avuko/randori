@@ -31,7 +31,7 @@ Satisfy prerequisites:
 ```bash
 sudo apt-get install build-essential dpatch fakeroot\
 devscripts equivs lintian quilt libpam0g-dev
- ```
+```
 
 [pam_randori.c](./pam_randori.c)
 
@@ -52,6 +52,7 @@ devscripts equivs lintian quilt libpam0g-dev
 
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 #include <security/pam_modules.h>
 #define LOGFILE "/var/log/randori.log"
 
@@ -65,6 +66,16 @@ PAM_EXTERN int pam_sm_authenticate(pam_handle_t * pamh, int flags
     const void *password;
     const void *rhostname;
     FILE *log;
+
+    time_t	now;
+    struct tm	ts;
+    char	timestamp[80];
+
+
+    time(&now);
+    // Format time, "yyyy-mm-ddThh:mm:ss+zzzz"
+    ts = *localtime(&now);
+    strftime(timestamp, sizeof(timestamp), "%Y-%m-%dT%H:%M:%S%z", &ts);
 
     /* get the name of the calling PAM_SERVICE. */
     retval=pam_get_item(pamh, PAM_SERVICE, &servicename);
@@ -82,8 +93,9 @@ PAM_EXTERN int pam_sm_authenticate(pam_handle_t * pamh, int flags
     */
     //if (password != NULL) {
     log = fopen (LOGFILE, "a");
-    fprintf(log, "%s\u2002%s\u2002%s\u2002%s\n", (char *) servicename,
-            (char *) rhostname, (char *) username, (char *) password);
+    fprintf(log, "%s\u2002%s\u2002%s\u2002%s\u2002%s\n", (char *) timestamp,
+    		    (char *) servicename, (char *) rhostname,
+    		    (char *) username, (char *) password);
     fclose( log);
 
     return PAM_IGNORE;
@@ -152,23 +164,23 @@ In order not to mess with the original code too much (and because I'm already wa
 out of my comfort zone writing/editing C), I made a simple change only:
 
 ```c
-	/* XXX avuko: 2017-19-06T17:00:00 Tweak to return
-     * the incorrect password entered */
+  /* XXX avuko: 2017-19-06T17:00:00 Tweak to return the password entered
+           for a non existing account */
+        /* t char junk[] = "\b\n\r\177INCORRECT"; */
+        /* const char junk[] = "ABCDEFGHIJKLMNOPQRS"; */
+        char *ret = NULL;
+        size_t i, l = wire_password != NULL ? strlen(wire_password) : 0;
 
-	/* t char junk[] = "\b\n\r\177INCORRECT"; */
-	char *ret = NULL;
-	size_t i, l = wire_password != NULL ? strlen(wire_password) : 0;
+        if (l >= INT_MAX)
+                fatal("%s: password length too long: %zu", __func__, l);
 
-	if (l >= INT_MAX)
-		fatal("%s: password length too long: %zu", __func__, l);
-
-	ret = malloc(l + 1);
-	for (i = 0; i < l; i++)
-		ret[i] = wire_password[i % (sizeof(wire_password) - 1)];
-		/* ret[i] = junk[i % (sizeof(junk) - 1)]; */
-	ret[i] = '\0';
-	return ret;
-}
+        ret = malloc(l + 1);
+        for (i = 0; i < l; i++)
+                ret[i] = wire_password[i];
+                /* ret[i] = junk[i % (sizeof(junk) - 1)]; */
+        ret[i] = '\0';
+        // ret = strcat(wire_password, '\0');
+        return ret;
 ```
 
 Yes, that is very, very likely a fully unnecessary loop. But then there is
