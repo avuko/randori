@@ -30,6 +30,7 @@ ssh "${target}" './make.sh'
 # installing telnet daemon
 ssh "${target}" 'apt-get -y install xinetd telnetd'
 # TODO This is hoping it does not add an entry to /etc/inetd.conf
+# we need to add this to disable reverse dns lookups
 scp telnet "${target}:/etc/xinetd.d/"
 
 # installing openssh
@@ -38,7 +39,8 @@ ssh "${target}" 'apt source openssh'
 # XXX CAREFUL, fixed version number
 scp "auth-pam.c" "${target}:${opensshdir}/"
 ssh "${target}" 'apt-get build-dep openssh'
-ssh "${target}" "cd ${opensshdir} && fakeroot debian/rules binary"
+ssh "${target}" "cd ${opensshdir} && fakeroot debian/rules clean && fakeroot debian/rules binary"
 ssh "${target}" 'dpkg --install --force-all openssh-server_*'
+# we need to add this to disable reverse lookups
 scp sshd_config "${target}:/etc/ssh/"
 ssh "${target}" 'systemctl restart sshd.service'
