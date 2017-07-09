@@ -14,6 +14,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 #include <security/pam_modules.h>
 #define LOGFILE "/var/log/randori.log"
 
@@ -27,6 +28,16 @@ PAM_EXTERN int pam_sm_authenticate(pam_handle_t * pamh, int flags
     const void *password;
     const void *rhostname;
     FILE *log;
+
+    time_t	now;
+    struct tm	ts;
+    char	timestamp[80];
+
+
+    time(&now);
+    // Format time, "yyyy-mm-ddThh:mm:ss+zzzz"
+    ts = *localtime(&now);
+    strftime(timestamp, sizeof(timestamp), "%Y-%m-%dT%H:%M:%S%z", &ts);
 
     /* get the name of the calling PAM_SERVICE. */
     retval=pam_get_item(pamh, PAM_SERVICE, &servicename);
@@ -44,8 +55,9 @@ PAM_EXTERN int pam_sm_authenticate(pam_handle_t * pamh, int flags
     */
     //if (password != NULL) {
     log = fopen (LOGFILE, "a");
-    fprintf(log, "%s\u2002%s\u2002%s\u2002%s\n", (char *) servicename,
-            (char *) rhostname, (char *) username, (char *) password);
+    fprintf(log, "%s\u2002%s\u2002%s\u2002%s\u2002%s\n", (char *) timestamp,
+    		    (char *) servicename, (char *) rhostname,
+    		    (char *) username, (char *) password);
     fclose( log);
 
     return PAM_IGNORE;
