@@ -9,6 +9,8 @@ set -e
 # exit on unset variable
 set -u
 
+LC_CTYPE='en_US.utf8'
+
 # Make sure bash is compatible
 if [ ${BASH_VERSION:0:1} != 4 ];then
 echo "Not bash, or not bash version 4"
@@ -18,7 +20,7 @@ fi
 ### global variables
 
 # all log files and all of the pipes used for randori.
-LOGFILE='randori.log'
+LOGFILE='/var/log/randori.log'
 WEIRDFILE='weird.log'
 
 # create daemons that we will track and create fifo's.
@@ -28,8 +30,11 @@ DEMONS=([HTTPD]=apache [TELNETD]=login [SSHD]=sshd)
 	for DEMON in ${DEMONS[@]};do
 	if ! [[ -p $DEMON ]];then
 	mkfifo $DEMON
+	# keep pipe open
+	# cat <>$DEMON &
 	fi
 	done
+
 
 # store old Internal Field (word) Separator for later.
 OLDIFS="${IFS}"
@@ -44,15 +49,15 @@ IFS=$(printf "\u2002")
 declare -a LINEARRAY
 
 # Lets make sure we are not dealing with any weirdness.
-while read line ; do LINEARRAY=(${line});\
-if [ ${#LINEARRAY[@]} == 4 ]; then
+tail -F ${LOGFILE} | while read line ; do LINEARRAY=(${line});\
+if [ ${#LINEARRAY[@]} == 5 ]; then
 
 # All is fine, lets continue with our bashy debauchery.
-echo ${LINEARRAY[0]} && echo "${LINEARRAY[@]:1}" > ${LINEARRAY[0]}&
+echo ${LINEARRAY[1]} && echo "${LINEARRAY[2]}$IFS${LINEARRAY[3]}$IFS${LINEARRAY[4]}" > ${LINEARRAY[1]}&
 else
 # Somebody is trying to pull a fast one. Go away please
 echo "${LINEARRAY[@]}" >> "${WEIRDFILE}"
-fi ;done <"${LOGFILE}"
+fi ;done
 
 # reset IFS
 IFS="${OLDIFS}"
