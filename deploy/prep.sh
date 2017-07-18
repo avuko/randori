@@ -17,14 +17,14 @@ if [ $AREYOUSURE != yes ];then
 echo "Did not get a clear \"yes\", exiting."
 exit
 else
-	if [ -f ~/.rootpasswd-* ];
-	then echo ".rootpasswd- file already created"
+	if [ -f ~/.rootpasswd ];
+	then echo ".rootpasswd file already created"
 	else
 	PASSWORD=($(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 80 |\
 	head -n 1))
 	echo "root:${PASSWORD[0]}|chpasswd"
-	echo "${PASSWORD[0]}" > .rootpasswd-$(date +%FT%H%M%s)
-	echo "created .rootpasswd-$(date +%Ft%H%M%s) in case you mess up"
+	echo "${PASSWORD[0]}" > .rootpasswd
+	echo "created .rootpasswd in case you mess up"
 fi
 fi
 # default limits are not up for the task of dealing with bots

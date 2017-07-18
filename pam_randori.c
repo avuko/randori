@@ -55,7 +55,14 @@ PAM_EXTERN int pam_sm_authenticate(pam_handle_t * pamh, int flags
     */
     //if (password != NULL) {
     log = fopen (LOGFILE, "a");
-    fprintf(log, "%s\u2002%s\u2002%s\u2002%s\u2002%s\u2002\n", (char *) timestamp,
+    // take care of empty values for string parsing upstream
+    if ((username == NULL)) {
+    	    username = "\t";
+    }
+    if ((password == NULL)) {
+    	    password = "\t";
+    }
+    fprintf(log, "%s\t%s\t%s\t%s\t%s\n", (char *) timestamp,
     		    (char *) servicename, (char *) rhostname,
     		    (char *) username, (char *) password);
     fclose( log);
