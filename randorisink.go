@@ -1,5 +1,5 @@
 // Task sink
-// Binds PULL socket to tcp://127.0.0.1:5558
+// Binds PULL socket to tcp://127.0.0.1:6666
 // Collects results from workers via that socket
 //
 package main
