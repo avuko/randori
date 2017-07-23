@@ -22,7 +22,7 @@ approachable when I had questions and comments about [cowrie](https://github.com
 
 
 All of the steps to build a randori system are (will be) in a [prep & deploy](https://github.com/avuko/randori/tree/master/deploy) script.
-The goal is to end up with a script you can point at an Ubuntu based DigitalOcean droplet
+The goal is to end up with a script you can point at an Ubuntu based system 
 and have a running randori system when it is done. Or read to see which steps are required.
 Because I hate chasing down undocumented dependencies at 2 in the morning.
 
