@@ -1,39 +1,21 @@
 #!/usr/bin/env bash
-TARGET='10.21.247.142'
+TARGET="${1}"
 echo "TELNET"
-echo "success:"
-(sleep 1; echo test1; sleep 1; echo test1; sleep 1;echo "result: $?")|\
-telnet $TARGET ;echo "result: $?"
-echo "fail, bad pw"
-(sleep 1; echo chinese; sleep 1; echo "儿童游戏"; sleep 1;)|\
-telnet $TARGET ; echo "result: $?"
-echo "fail, user=chinese UTF-8"
-(sleep 1; echo "儿童游戏"; sleep 1; echo "chines"; sleep 1;)|\
-telnet $TARGET ; echo "result: $?"
-echo "fail, pw=chinese UTF-8"
-(sleep 1; echo test1; sleep 1; echo badpw; sleep 1;echo "result: $?")|\
-telnet $TARGET ; echo "result: $?"
-echo "fail, bad user"
-(sleep 1; echo baduser; sleep 1; echo test1; sleep 1;)|\
-telnet $TARGET ; echo "result: $?"
-echo "fail, bad pw/user"
-(sleep 1; echo baduser; sleep 1; echo badpw; sleep 1;)|\
-telnet $TARGET ; echo "result: $?"
-echo "fail, empty user"
-(sleep 1; echo ""; sleep 1; echo emptyuser; sleep 1;)|\
-telnet $TARGET ; echo "result: $?"
-echo "fail, empty pw"
-(sleep 1; echo emptypw; sleep 1; echo ""; sleep 1;)|\
-telnet $TARGET ; echo "result: $?"
-echo "fail, empty user/pw"
-(sleep 1; echo ""; sleep 1; echo ""; sleep 1;)|\
-telnet $TARGET ; echo "result: $?"
-echo "fail, cr"
-(sleep 1; echo "cr"; sleep 1; echo -e "\r\rcr"; sleep 1;)|\
-telnet $TARGET ; echo "result: $?"
-echo "fail, nl"
-(sleep 1; echo "nl"; sleep 1; echo -e "\n\nnl"; sleep 1;)|\
-telnet $TARGET ; echo "result: $?"
+
+creds=(test1:test1 儿童游戏:chinese\
+	chinese:儿童游戏\
+       	test1:badpw\
+       	baduser:test1\
+       	:emptyuser emptypass:)
+for cred in ${creds[@]};do
+	username="${cred%:*}"
+	password="${cred#*:}"
+	echo ${username}:${password}
+	(sleep 1; echo "${username}"; sleep 1; echo "${password}"; sleep 1)|\
+		telnet ${TARGET}
+done
+
+
 echo SSH
 echo "success:"
 sshpass -p 'test1' ssh "test1@${TARGET}"
