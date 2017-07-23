@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-workersnr='16'
+# workersnr = 16
 
 echo "Making sure previous run is killed"
 
@@ -12,11 +12,11 @@ sleep 3
 
 # spin up telnet workers
 echo "starting telnet"
-for i in {1..${workersnr}}; do ./toritelnet-linux-amd64 & done
+for i in {1..16}; do ./toritelnet-linux-amd64 & done
 
 # spin up ssh workers
 echo "starting ssh"
-for i in {1..${workersnr}}; do ./torissh-linux-amd64 & done
+for i in {1..16}; do ./torissh-linux-amd64 & done
 sleep 3
 
 # start tailing the PAM randori log and feeding the fan
