@@ -3,8 +3,8 @@ package main
 import (
 	"bytes"
 	// "encoding/hex"
-	// "log"
 	"fmt"
+	// "log"
 	"net"
 	"strings"
 	"time"
@@ -19,7 +19,7 @@ import (
 var IAC  = []byte{255}
 
 func noyoudont(buf []byte, n int) (replace []byte) {
-	// log.Printf("buf[0] = %v, this is real telnet", buf[0])
+	// log.Printf("buf[0] = %v, this is real telnet", buf[0]) // DEBUG
 	// log.Printf(hex.EncodeToString(buf[:n])) // DEBUG
 	// do -> dont ; will -> wont
 	replace = bytes.Replace(buf[:n], []byte{255, 253}, []byte{255, 254}, -1)
@@ -43,7 +43,7 @@ func authcheck(ip, username, password string) (response []byte) {
 	defer conn.Close()
 	for {
 		buf := make([]byte, 4096)
-		// disconnect after *Millisecond if nothings in the buf
+		// disconnect after *Millisecond if nothing is in the buf
 		err := conn.SetReadDeadline(time.Now().Add(4000 * time.Millisecond))
 		if err != nil {
 			errmsg = fmt.Sprintf("ERROR:%s", err)
@@ -65,9 +65,9 @@ func authcheck(ip, username, password string) (response []byte) {
 				// log.Printf("firstbuf: %s", firstbuf)
 				response = append(response, firstbuf...)
 
-				// We cannot look for \n or EOF. Most if not all
-				// login prompts end with a ':' but not
-				// all.
+				// We cannot look for \n or EOF. Most
+				// login prompts end with a ':'
+				// ... but not all.
 				// So lets just trust what the malware gave us.
 				// Wait. DID I JUST SAY THAT?!
 				//
@@ -166,6 +166,9 @@ func main() {
 		rline := strings.Split(string(msgbytes), "\t")
 		ip, username, password := rline[1], rline[2], rline[3]
 		result := authcheck(ip[:], username[:], password[:])
+		// Remove newlines from telnet
+		result = bytes.Replace(result, []byte("\r"), []byte(" "), -1)
+		result = bytes.Replace(result, []byte("\n"), []byte(" "), -1)
 		authcheckresult := fmt.Sprintf("%s\t%s\t%s\t%s\t%s", "TELNET", ip, username, password, result[:])
 		sender.Send([]byte(authcheckresult), 0)
 	}

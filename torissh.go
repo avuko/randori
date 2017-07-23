@@ -16,7 +16,6 @@ func authcheck(ip, username, password string) (response []byte) {
 		ClientVersion: "SSH-2.0-OpenSSH_7.2p2 Ubuntu-4ubuntu2.2",
 	}
 	connection, err := ssh.Dial("tcp", ip+":22", sshConfig)
-	// serverversion := string(connection.ServerVersion())
 	if err != nil {
 		errmsg = fmt.Sprintf("ERROR:%s", err)
 		response = []byte(errmsg)
