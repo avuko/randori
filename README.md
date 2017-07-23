@@ -4,7 +4,7 @@
 
 <!-- ![randori](randori.gif) -->
 
-<img src="randori.gif" align="left" />
+<img src="./randori.gif" align="left" />
 
 > Randori (乱取り) is a form of practice<br />
 > in which a designated aikidoka<br />
