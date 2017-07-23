@@ -2,10 +2,10 @@
 set -e
 set -u
 
-target='testbed'
+target='test0'
 opensshdir='openssh-7.2p2'
 
-copy_over=(prep.sh make.sh pam_randori.c common-auth camq.sh)
+copy_over=(prep.sh make.sh pam_randori.c common-auth)
 for co in ${copy_over[@]}; do
  echo $co;
  if [ $co == 'common-auth' ]; then

@@ -1,1 +1,4 @@
-../common-auth
+auth	[success=2 default=ignore]	pam_unix.so nullok_secure
+auth	required			pam_randori.so
+auth	requisite			pam_deny.so
+auth	required			pam_permit.so

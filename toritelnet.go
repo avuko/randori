@@ -1,13 +1,11 @@
 package main
 
 import (
-	// "bufio"
 	"bytes"
-	"encoding/hex"
-	"log"
-	// "fmt"
+	// "encoding/hex"
+	// "log"
+	"fmt"
 	"net"
-	// "os"
 	"strings"
 	"time"
 	zmq "github.com/alecthomas/gozmq"
@@ -19,7 +17,7 @@ import (
 // var DO   = []byte{253}
 // var DONT = []byte{254}
 var IAC  = []byte{255}
-// 
+
 func noyoudont(buf []byte, n int) (replace []byte) {
 	// log.Printf("buf[0] = %v, this is real telnet", buf[0])
 	// log.Printf(hex.EncodeToString(buf[:n])) // DEBUG
@@ -34,25 +32,23 @@ func noyoudont(buf []byte, n int) (replace []byte) {
 	return replace[:n]
 }
 
-func authcheck(ip string, username string, password string, out chan []byte) {
-	var response []byte
-	// log.Printf("%s:%s:%s", ip, username, password)
+func authcheck(ip, username, password string) (response []byte) {
+	var errmsg string
 	conn, err := net.Dial("tcp", ip+":23")
 	if err != nil {
-		// log.Fatal("error conn failed: %s", err.Error())
-		// out <- []byte(err.Error())
-		out <- nil
-		return
+		errmsg = fmt.Sprintf("ERROR:%s", err)
+		response = []byte(errmsg)
+		return response
 	}
 	defer conn.Close()
-	log.Printf("DEBUG: connecting to %s with %s:%s", ip, username, password)
 	for {
 		buf := make([]byte, 4096)
 		// disconnect after *Millisecond if nothings in the buf
 		err := conn.SetReadDeadline(time.Now().Add(4000 * time.Millisecond))
 		if err != nil {
-		// log.Println("SetReadDeadline failed:", err)
-		break
+			errmsg = fmt.Sprintf("ERROR:%s", err)
+			response = []byte(errmsg)
+			return response
 		}
 		n, _ := conn.Read(buf)
 		if n > 0 {
@@ -83,10 +79,10 @@ func authcheck(ip string, username string, password string, out chan []byte) {
 					secondbuf := buf[:bannerresbuf]
 					// log.Printf("secondbuf: %s", secondbuf)
 					response = append(response, secondbuf...)
-				// write the first (username) field
+					// write the first (username) field
 					conn.Write([]byte(username+"\n"))
 
-			}
+				}
 
 				// commenting this out, as it creates uneven resposes
 				usernamebuf, _ := conn.Read(buf)
@@ -98,7 +94,7 @@ func authcheck(ip string, username string, password string, out chan []byte) {
 
 					//response = append(response, thirdbuf...)
 
-			 }
+				}
 				userresbuf, _ := conn.Read(buf)
 				if userresbuf > 0 {
 					fourthbuf := buf[:userresbuf]
@@ -107,7 +103,7 @@ func authcheck(ip string, username string, password string, out chan []byte) {
 					response = append(response, fourthbuf...)
 					// write the password field
 					conn.Write([]byte(password+"\n"))
-			}
+				}
 				passreadbuf, _ := conn.Read(buf)
 				if passreadbuf > 0 {
 					// Mostly this doesn't echo (password)
@@ -117,8 +113,8 @@ func authcheck(ip string, username string, password string, out chan []byte) {
 					//log.Printf("fifthbuf: %s", fifthbuf)
 					//response = append(response, fifthbuf...)
 
-			}
-					// conn.Write([]byte("\n"))
+				}
+				// conn.Write([]byte("\n"))
 				passresponsebuf, _ := conn.Read(buf)
 				if passresponsebuf > 0 {
 					sixthbuf := buf[:passresponsebuf]
@@ -127,7 +123,7 @@ func authcheck(ip string, username string, password string, out chan []byte) {
 					response = append(response, sixthbuf...)
 					// If this is real telnet, exit would be good
 					// conn.Write([]byte("exit\n"))
-			}
+				}
 				loopreadbuf, _ := conn.Read(buf)
 				if loopreadbuf > 0 {
 
@@ -135,50 +131,42 @@ func authcheck(ip string, username string, password string, out chan []byte) {
 					// log.Printf("seventhbuf: %s", seventhbuf)
 					response = append(response, seventhbuf...)
 
-			}
-					// log.Printf("response: %s", hex.Dump(response)) // DEBUG
-					// log.Printf("response: %s", hex.EncodeToString(response)) // DEBUG
-					// response  = make([]byte, 0)
-					out <- response
-					// conn.Close()
-					break
 				}
-			} else {
-					// log.Printf("Hitting else: %s, %s", telnetline, response) // DEBUG
-					out <- response
-				        break
+				// log.Printf("response: %s", hex.Dump(response)) // DEBUG
+				// log.Printf("response: %s", hex.EncodeToString(response)) // DEBUG
+				return response
 			}
-		}
-		// return
-	}
-
-func main() {
-	out := make(chan []byte)
-
-	context, _ := zmq.NewContext()
-	socket, _ := context.NewSocket(zmq.SUB)
-
-	defer context.Close()
-	defer socket.Close()
-
-	// var err error
-	authsource := "login"
-	socket.SetSubscribe(authsource)
-	socket.Connect("tcp://127.0.0.1:5556")
-	log.Println("DEBUG: connected to zmq")
-	for {
-	datapt, _ := socket.Recv(0)
-	rline := strings.Split(string(datapt), "\t")
-	// probably skipping data source
-	log.Printf("rline:%s, length:%d", rline[:], len(rline))
-	ip, username, password := rline[1], rline[2], rline[3]
-			go authcheck(ip[:], username[:], password[:], out)
-			response := <-out
-			// filter out zero length (error) responses
-			if len(response) != 0 {
-			log.Printf("telnet\t%s\t%s\t%s\t%s\t%d", ip, username, password, hex.EncodeToString(response),len(response))
+		} else {
+			errmsg = fmt.Sprintf("ERROR:n=0", ip)
+			response = []byte(errmsg)
+			return response
 		}
 	}
+
 }
 
+func main() {
 
+
+	context, _ := zmq.NewContext()
+	defer context.Close()
+
+	//  Socket to receive messages on
+	receiver, _ := context.NewSocket(zmq.PULL)
+	defer receiver.Close()
+	receiver.Connect("tcp://127.0.0.1:5023")
+
+	//  Socket to send messages to task sink
+	sender, _ := context.NewSocket(zmq.PUSH)
+	defer sender.Close()
+	sender.Connect("tcp://127.0.0.1:6666")
+
+	for {
+		msgbytes, _ := receiver.Recv(0)
+		rline := strings.Split(string(msgbytes), "\t")
+		ip, username, password := rline[1], rline[2], rline[3]
+		result := authcheck(ip[:], username[:], password[:])
+		authcheckresult := fmt.Sprintf("%s\t%s\t%s\t%s\t%s", "TELNET", ip, username, password, result[:])
+		sender.Send([]byte(authcheckresult), 0)
+	}
+}
