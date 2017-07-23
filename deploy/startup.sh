@@ -11,11 +11,11 @@ sleep 3
 
 # spin up 4 telnet workers
 echo "starting telnet"
-for i in {1..4}; do ./toritelnet-linux-amd64 & done
+for i in {1..16}; do ./toritelnet-linux-amd64 & done
 
 # spin up 4 ssh workers
 echo "starting ssh"
-for i in {1..4}; do ./torissh-linux-amd64 & done
+for i in {1..16}; do ./torissh-linux-amd64 & done
 sleep 3
 
 # start tailing the PAM randori log and feeding the fan
