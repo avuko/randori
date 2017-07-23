@@ -137,7 +137,7 @@ func authcheck(ip, username, password string) (response []byte) {
 				return response
 			}
 		} else {
-			errmsg = fmt.Sprintf("ERROR:n=0", ip)
+			errmsg = fmt.Sprintf("ERROR:n=0 for %s", ip)
 			response = []byte(errmsg)
 			return response
 		}
