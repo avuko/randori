@@ -818,9 +818,8 @@ static char *
 fake_password(const char *wire_password)
 {
 	/* XXX avuko: 2017-19-06T17:00:00 Tweak to return the password entered
-           for a non existing account */ 
+           for a non existing account */
 	/* t char junk[] = "\b\n\r\177INCORRECT"; */
-	/* const char junk[] = "ABCDEFGHIJKLMNOPQRS"; */
 	char *ret = NULL;
 	size_t i, l = wire_password != NULL ? strlen(wire_password) : 0;
 
