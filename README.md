@@ -28,3 +28,18 @@ Because I hate chasing down undocumented dependencies at 2 in the morning.
 
 This will all log to something nice like `ELK` or `sqlite3` by the time I'm done.
 
+
+## PS
+
+I'm still thinking of the best way to patch the golang ssh client library.
+You'll need to change <godir>src/golang.org/x/crypto/ssh/common.go to contain:
+
+```diff
+var supportedCiphers = []string{
+ 	"aes128-ctr", "aes192-ctr", "aes256-ctr",
+ 	"aes128-gcm@openssh.com",
+-	"arcfour256", "arcfour128",
++	"arcfour256", "arcfour128", "aes128-cbc",
+ }
+```
+
