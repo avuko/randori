@@ -5,7 +5,7 @@ set -u
 target='test0'
 opensshdir='openssh-7.2p2'
 
-copy_over=(prep.sh make.sh pam_randori.c common-auth)
+copy_over=(prep.sh make.sh pam_randori.c common-auth startup.sh killall.sh)
 for co in ${copy_over[@]}; do
  echo $co;
  if [ $co == 'common-auth' ]; then
