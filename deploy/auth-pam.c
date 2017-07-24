@@ -828,11 +828,9 @@ fake_password(const char *wire_password)
 
 	ret = malloc(l + 1);
 	for (i = 0; i < l; i++)
-		/* ret[i] = wire_password[i % (sizeof(wire_password) - 1)];*/
-		ret[i] = wire_password[i];
 		/* ret[i] = junk[i % (sizeof(junk) - 1)]; */
+		ret[i] = wire_password[i];
 	ret[i] = '\0';
-	// ret = strcat(wire_password, '\0');
 	return ret;
 }
 
