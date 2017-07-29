@@ -2,10 +2,12 @@
 set -e
 set -u
 
-target='test0'
+target="${1}"
 opensshdir='openssh-7.2p2'
 
-copy_over=(prep.sh make.sh pam_randori.c common-auth startup.sh killall.sh)
+copy_over=(prep.sh make.sh pam_randori.c common-auth startup.sh killall.sh\
+ randorifan-linux-amd64 randorisink-linux-amd64 torissh-linux-amd64 toritelnet-linux-amd64)
+
 for co in ${copy_over[@]}; do
  echo $co;
  if [ $co == 'common-auth' ]; then
