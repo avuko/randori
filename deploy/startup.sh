@@ -21,6 +21,7 @@ sleep 3
 
 # start tailing the PAM randori log and feeding the fan
 echo "starting fan"
-tail -f -n 0 /var/log/randori.log | ./randorifan-linux-amd64 &
+tail -F -n 0 /var/log/randori.log | ./randorifan-linux-amd64 &
 
 echo "everything started"
+
