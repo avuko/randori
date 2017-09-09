@@ -2,9 +2,6 @@
 set -e
 set -u
 
-echo "!!! THIS WILL TURN YOUR SYSTEM INTO A HONEYPOT   !!!"
-echo "!!! IT CAN NEVER AGAIN BE USED FOR ANYTHING ELSE !!!"
-
 target="${1}"
 opensshdir='openssh-7.2p2'
 
@@ -49,12 +46,14 @@ ssh "${target}" './make.sh'
 ssh "${target}" 'apt-get -y install xinetd telnetd'
 # we need to add this configuration to disable reverse dns lookups
 scp telnet "${target}:/etc/xinetd.d/"
+
+
 # XXX CAREFUL, hardcoded replace
 ssh "${target}" "sed -i 's/^telnet/#telnet/g' /etc/inetd.conf"
 ssh "${target}" 'systemctl restart xinetd.service'
-
 # installing openssh
 ssh "${target}" 'apt source openssh'
+
 # XXX CAREFUL, fixed version number
 scp "auth-pam.c" "${target}:${opensshdir}/"
 ssh "${target}" 'apt-get build-dep openssh'
@@ -64,8 +63,3 @@ ssh "${target}" 'dpkg --install --force-all openssh-server_*'
 # logins
 scp sshd_config "${target}:/etc/ssh/"
 ssh "${target}" 'systemctl restart sshd.service'
-
-# installing xrdp
-# https://github.com/neutrinolabs/xrdp/issues/392
-apt-get source xrdp
-apt-get build-dep xrdp
