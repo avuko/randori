@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # ONLY CHANGE THIS IF YOU HAVE PASSWORDLESS root ACCESS
-AREYOUSURE='yes'
+AREYOUSURE='no'
 
 # need to be root for this
 if [ $(id -u) == 0 ];then
@@ -14,6 +14,7 @@ fi
 
 # change the root password to something impossibly hard to brute force
 if [ $AREYOUSURE != yes ];then
+echo "First check that you have passwordless root access."
 echo "Did not get a clear \"yes\", exiting."
 exit
 else
