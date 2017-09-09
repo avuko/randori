@@ -54,3 +54,5 @@ dkms.conf
 # randori stuff
 *rootpassword
 *linux-amd64
+report/
+store/
