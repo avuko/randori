@@ -5,12 +5,19 @@ set -u
 target="${1}"
 opensshdir='openssh-7.2p2'
 
-copy_over=(prep-hp.sh make.sh pam_randori.c common-auth)
+copy_over=(prep-hp.sh make.sh pam_randori.c common-auth rsyslog rsyslog.conf)
 
 for co in ${copy_over[@]}; do
  echo $co;
  if [ $co == 'common-auth' ]; then
 	scp $co ${target}:/etc/pam.d/
+elif [ $co == 'rsyslog' ]; then
+	echo "!! WARNING: please note I'm setting your logfiles up to"
+	echo "pile up for a full year. This could fill up your disks."
+	scp $co ${target}:/etc/logrotate.d/rsyslog
+elif [ $co == 'rsyslog.conf' ]; then
+	scp $co ${target}:/etc/rsyslog.conf
+	ssh ${target} '/etc/init.d/rsyslog restart'
 else
 	scp $co ${target}:.
 fi

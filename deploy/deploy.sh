@@ -6,7 +6,8 @@ target="${1}"
 opensshdir='openssh-7.2p2'
 
 copy_over=(rsyslog prep.sh make.sh pam_randori.c common-auth startup.sh killall.sh\
- randorifan-linux-amd64 randorisink-linux-amd64 torissh-linux-amd64 toritelnet-linux-amd64)
+ randorifan-linux-amd64 randorisink-linux-amd64 torissh-linux-amd64 toritelnet-linux-amd64\
+ rsyslog rsyslog.conf)
 
 for co in ${copy_over[@]}; do
  echo $co;
@@ -16,7 +17,6 @@ elif [ $co == 'rsyslog' ]; then
 	echo "!! WARNING: please note I'm setting your logfiles up to"
 	echo "pile up for a full year. This could fill up your disks."
 	scp $co ${target}:/etc/logrotate.d/rsyslog
-	ssh ${target} '/etc/init.d/rsyslog restart'
 elif [ $co == 'rsyslog.conf' ]; then
 	scp $co ${target}:/etc/rsyslog.conf
 	ssh ${target} '/etc/init.d/rsyslog restart'

@@ -6,22 +6,27 @@ echo "Making sure previous run is killed"
 ./killall.sh
 
 # start sink. Currently logs to "log-of-randori"
-echo "starting sink"
+#echo "starting sink"
 ./randorisink-linux-amd64 &
 sleep 3
 
 # spin up telnet workers
-echo "starting telnet"
+#echo "starting telnet"
 for i in {1..16}; do ./toritelnet-linux-amd64 & done
 
 # spin up ssh workers
-echo "starting ssh"
+#echo "starting ssh"
 for i in {1..16}; do ./torissh-linux-amd64 & done
 sleep 3
 
+# spin up ssh workers
+#echo "starting ssh"
+for i in {1..16}; do ./toriftp-linux-amd64 & done
+sleep 3
+
 # start tailing the PAM randori log and feeding the fan
-echo "starting fan"
+# echo "starting fan"
 tail -F -n 0 /var/log/randori.log | ./randorifan-linux-amd64 &
 
-echo "everything started"
+# echo "everything started"
 
