@@ -27,7 +27,7 @@ opensshdir='openssh-7.2p2'
 
 copy_over=(rsyslog prep.sh make.sh pam_randori.c common-auth startup.sh killall.sh\
  randorifan-linux-amd64 randorisink-linux-amd64 torissh-linux-amd64 toritelnet-linux-amd64\
- rsyslog rsyslog.conf)
+ rsyslog rsyslog.conf login.defs)
 
 for co in ${copy_over[@]}; do
  echo $co;
@@ -44,6 +44,8 @@ elif [ $co == 'rsyslog' ]; then
 elif [ $co == 'rsyslog.conf' ]; then
 	scp $co ${target}:/etc/rsyslog.conf
 	ssh ${target} '/etc/init.d/rsyslog restart'
+elif [ $co == 'login.defs' ]; then
+	scp $co ${target}:/etc/login.defs
 else
 	scp $co ${target}:.
 fi
@@ -71,6 +73,7 @@ ssh "${target}" './make.sh'
 ssh "${target}" 'apt-get -y install xinetd telnetd'
 # we need to add this configuration to disable reverse dns lookups
 scp telnet "${target}:/etc/xinetd.d/"
+scp xinetd.conf "${target}:/etc/xinetd.conf"
 
 # installing ftp daemon
 ssh "${target}" 'apt-get -y install vsftpd'

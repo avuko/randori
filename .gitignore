@@ -52,7 +52,8 @@ Mkfile.old
 dkms.conf
 
 # randori stuff
-*rootpassword
+*rootpasswd
 *linux-amd64
 report/
 store/
+build.sh

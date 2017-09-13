@@ -169,7 +169,7 @@ func main() {
 		// Remove newlines from telnet
 		result = bytes.Replace(result, []byte("\r"), []byte(" "), -1)
 		result = bytes.Replace(result, []byte("\n"), []byte(" "), -1)
-		authcheckresult := fmt.Sprintf("%s\t%s\t%s\t%s\t%s", "TELNET", ip, username, password, result[:])
+	authcheckresult := fmt.Sprintf("TORITELNET: ip=%s username=%s password=%s result=%s", ip, username, password, result[:])
 		sender.Send([]byte(authcheckresult), 0)
 	}
 }

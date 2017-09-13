@@ -7,4 +7,5 @@ service telnet
         user            = root
         server          = /usr/sbin/in.telnetd
 	server_args     = -N
+        instances       = unlimited
 }

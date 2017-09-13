@@ -14,6 +14,7 @@ func authcheck(ip, username, password string) (response []byte) {
 		User: string(username),
 		Auth: []ssh.AuthMethod{ssh.Password(string(password))},
 		ClientVersion: "SSH-2.0-OpenSSH_7.2p2 Ubuntu-4ubuntu2.2",
+		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}
 	connection, err := ssh.Dial("tcp", ip+":22", sshConfig)
 	if err != nil {
@@ -46,7 +47,7 @@ func main() {
 	rline := strings.Split(string(msgbytes), "\t")
 	ip, username, password := rline[1], rline[2], rline[3]
 	result := authcheck(ip[:], username[:], password[:])
-	authcheckresult := fmt.Sprintf("%s\t%s\t%s\t%s\t%s", "SSH", ip, username, password, result[:])
+	authcheckresult := fmt.Sprintf("TORISSH: ip=%s username=%s password=%s result=%s", ip, username, password, result[:])
 	sender.Send([]byte(authcheckresult), 0)
 	}
 

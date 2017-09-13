@@ -19,10 +19,10 @@ for i in {1..16}; do ./toritelnet-linux-amd64 & done
 for i in {1..16}; do ./torissh-linux-amd64 & done
 sleep 3
 
-# spin up ssh workers
-#echo "starting ssh"
-for i in {1..16}; do ./toriftp-linux-amd64 & done
-sleep 3
+# spin up ftp workers
+# echo "starting ftp"
+# for i in {1..16}; do ./toriftp-linux-amd64 & done
+# sleep 3
 
 # start tailing the PAM randori log and feeding the fan
 # echo "starting fan"

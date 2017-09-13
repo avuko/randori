@@ -14,12 +14,18 @@ import (
 	"bufio"
 	"fmt"
 	"log"
+        "log/syslog"
 	"os"
 	"strings"
 	zmq "github.com/alecthomas/gozmq"
 )
 
 func main() {
+    logwriter, e := syslog.New(syslog.LOG_NOTICE, "randorifan")
+    if e == nil {
+	log.SetFlags(0)
+        log.SetOutput(logwriter)
+    }
     fifofile := os.Stdin
     stdininfo, _ := fifofile.Stat()
     context, _ := zmq.NewContext()
@@ -35,6 +41,11 @@ func main() {
     defer sshsender.Close()
     sshsender.Bind("tcp://127.0.0.1:5022")
 
+    // Socket to send ftp messages through [vsftpd
+    ftpsender, _ := context.NewSocket(zmq.PUSH)
+    defer ftpsender.Close()
+    sshsender.Bind("tcp://127.0.0.1:5021")
+
     // Socket to send result messages through
     sink, _ := context.NewSocket(zmq.PUSH)
     defer sink.Close()
@@ -44,8 +55,7 @@ func main() {
 
 	// Check whether stdininfo has a Mode and is a CharDevice
 	if (stdininfo.Mode() & os.ModeCharDevice != 0) {
-		log.Println("The command is intended to work with pipes.")
-		log.Fatal("So, go use a pipe.")
+		log.Fatal("The command is intended to work with pipes.")
 
 	// Check whether stdininfo has a Mode and is a NamedPipe
 	} else if (stdininfo.Mode() & os.ModeNamedPipe != 0) {
@@ -56,6 +66,10 @@ func main() {
 			// log.Printf("%d", len(rline)) // DEBUG
 			if len(rline) == 5 {
 			authsource, ip, username, password := rline[1], rline[2], rline[3], rline[4]
+			// I'm going to actively remove tabs, might catch some more
+			username = strings.Replace(username, "\t", " ", -1)
+			password = strings.Replace(password, "\t", " ", -1)
+
 			// log.Printf("%s\t%s\t%s\t%s", authsource, ip, username, password) //DEBUG
 			msg := fmt.Sprintf("%s\t%s\t%s\t%s", authsource, ip[:], username[:], password[:])
 

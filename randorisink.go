@@ -9,19 +9,19 @@ import (
 	// "fmt"
 	// "io"
 	"log"
-	"os"
+        "log/syslog"
+	// "os"
 	// "time"
 	zmq "github.com/alecthomas/gozmq"
 )
 
 func main() {
 	//create logfile with desired read/write permissions
-	f, err := os.OpenFile("log-of-randori", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer f.Close()
-	log.SetOutput(f)
+	logwriter, e := syslog.New(syslog.LOG_NOTICE, "randorisink")
+	if e == nil {
+	log.SetFlags(0)
+        log.SetOutput(logwriter)
+    }
 
 	// defer closing of context
 	context, _ := zmq.NewContext()
