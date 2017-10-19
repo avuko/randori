@@ -1,5 +1,8 @@
 # randori: fend off multiple attackers
 
+See my [presentation](https://github.com/avuko/randori/tree/master/slides.pdf)
+for background and possible next steps.
+
 ## Fully based on PAM (*P*wn *A*ll *M*alware)
 
 <!-- ![randori](randori.gif) -->
