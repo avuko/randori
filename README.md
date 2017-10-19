@@ -12,7 +12,8 @@
 > in quick succession.<br />
 > [https://en.wikipedia.org/wiki/Randori](https://en.wikipedia.org/wiki/Randori)
 
-Basically it is my http://github.com/avuko/aiki PoC on steroids.
+Basically it is my http://github.com/avuko/aiki PoC on steroids. It
+currently supports ssh and telnet, with more protocols in the works.
 
 Shoutout to `0xBF` ([ONSec-Lab](https://github.com/ONsec-Lab/scripts/tree/master/pam_steal))
 for giving us pam_steal. Everything here started with that one simple, great idea.
