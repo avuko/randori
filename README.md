@@ -1,7 +1,8 @@
 # randori: fend off multiple attackers
 
 See my [presentation](https://github.com/avuko/randori/tree/master/slides.pdf)
-for background and possible next steps.
+or the video from [hack.lu 2017](https://www.youtube.com/watch?v=-i1cyxTa8AM)
+for the background of this tool and possible next steps.
 
 ## Fully based on PAM (*P*wn *A*ll *M*alware)
 
