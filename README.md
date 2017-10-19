@@ -72,6 +72,6 @@ software. Use responsibly.
 
 Nothing can stop you from using this tool -or tools like this- for
 evil/stupid. Please consider that those "boxes" you hope to be "popping"
-when you use any of the tools infosec provides, belong to actual people.
+when you use any of the tools infosec provides, belong to real people.
 
-Don't be an asshat.
+Have some compassion. Or if that is too complicated, just don't be an asshat.
